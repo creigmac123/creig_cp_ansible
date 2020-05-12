@@ -1,7 +1,8 @@
 - name: Zookeeper Upgrade - Prep
   hosts: zookeeper
+  tasks:
   # Running serial=1 because add_host has problems
-  # https://stackoverflow.com/questions/42106527/ansible-how-to-call-module-add-host-for-all-hosts-of-the-play
+  #https://stackoverflow.com/questions/42106527/ansible-how-to-call-module-add-host-for-all-hosts-of-the-play
   serial: 1
   tags:
     - prep
@@ -49,34 +50,37 @@
       args:
         executable: /bin/bash
       register: leader_query
-
-    - name: Add host to Follower Group
-      add_host:
-        name: "{{ inventory_hostname }}"
-        group: upgrade_zookeeper_followers
-      delegate_to: localhost
-      when:
-        - '"follower" in leader_query.stdout'
-        - zookeeper_current_version != confluent_full_package_version
-        - zookeeper_current_version != confluent_package_version
-
-    - name: Add host to Leader Group
-      add_host:
-        name: "{{ inventory_hostname }}"
-        group: upgrade_zookeeper_leader
-      delegate_to: localhost
-      when:
-        - '"leader" in leader_query.stdout'
-        - zookeeper_current_version != confluent_full_package_version
-        - zookeeper_current_version != confluent_package_version
-
     - debug:
-        msg: "Leader: {{inventory_hostname}}"
-      when: '"leader" in leader_query.stdout'
+         msg: "{{leader_query}}"
+
+  #  - name: Add host to Follower Group
+  #    add_host:
+  #      name: "{{ inventory_hostname }}"
+  #      group: upgrade_zookeeper_followers
+  #    delegate_to: localhost
+  #    when:
+  #      - '"follower" in leader_query.stdout'
+  #      - zookeeper_current_version != confluent_full_package_version
+  #      - zookeeper_current_version != confluent_package_version
+  #   - debug:
+  #  - name: Add host to Leader Group
+  #    add_host:
+  #      name: "{{ inventory_hostname }}"
+  #      group: upgrade_zookeeper_leader
+  #    delegate_to: localhost
+  #    when:
+  #      - '"leader" in leader_query.stdout'
+  #      - zookeeper_current_version != confluent_full_package_version
+  #      - zookeeper_current_version != confluent_package_version
+
+  #  - debug:
+  #      msg: "Leader: {{inventory_hostname}}"
+  #    when: '"leader" in leader_query.stdout'
 
 - name: Zookeeper Upgrade
   # Putting leader group last here with serial=1 so the leader runs last
-  hosts: upgrade_zookeeper_followers,upgrade_zookeeper_leader
+  hosts: zookeeper
+  #hosts: upgrade_zookeeper_followers,upgrade_zookeeper_leader
   environment: "{{ proxy_env }}"
   serial: 1
   tags:

@@ -6,6 +6,12 @@
     - import_role:
         name: confluent.variables_handlers
 
+    - name: Create Backup Directory
+          file:
+            path: "/var/lib/confluent/control-center/tmp"
+            state: directory
+            mode: 0640
+
     - name: Get Package Facts
       package_facts:
         manager: auto

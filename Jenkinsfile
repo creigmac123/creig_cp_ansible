@@ -1,17 +1,34 @@
-#!/usr/bin/env groovy
 
-def config = jobConfig {
-    nodeLabel = 'docker-oraclejdk8'
-    slackChannel = '#ansible-eng'
-    timeoutHours = 4
-    runMergeCheck = false
-}
+pipeline {
 
-def job = {
-    stage("Hello world") {
-        echo "Running unit and integration tests"
-        sh "env"
+    agent any
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5'))
+      }
+    tools {
+        maven 'M3'
+
     }
-}
+    environment {
+         BUILD_ID = "${BUILD_NUMBER}"
 
-runJob config, job
+    }
+    stages {
+        stage ('Initialize') {
+          steps {
+                       echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+
+                             script{
+                                      ansiblePlaybook(credentialsId: 'private_key',
+                                                       inventory: 'inventories/a/hosts', 
+                                                       playbook: 'my_playbook.yml')
+
+                                      echo sh(script: 'env', returnStdout: true)
+                                 }
+                      }
+
+              }
+            }
+
+}

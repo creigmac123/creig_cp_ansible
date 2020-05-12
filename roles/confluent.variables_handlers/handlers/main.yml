@@ -1,6 +1,7 @@
 ---
 - name: load sysctl
   command: sysctl -p
+  ignore_errors: yes
 
 - name: reload systemd
   command: systemctl daemon-reload

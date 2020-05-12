@@ -16,10 +16,24 @@
 - name: Host Prerequisites
   hosts: zookeeper:kafka_broker:schema_registry:kafka_connect:ksql:control_center:kafka_rest
   tags: common
+  become: yes
   environment: "{{ proxy_env }}"
   tasks:
   - import_role:
       name: confluent.common
+  - debug:
+     msg: "{{ proxy_env }}"
+
+
+- name: Check Installed Confluent packages
+  hosts: zookeeper:kafka_broker:schema_registry:kafka_connect:ksql:control_center:kafka_rest
+  tasks:
+  - name: run command
+    command: yum list installed  | grep confluent*
+    register: rpm_installed
+  - debug:
+     msg: "{{rpm_installed}}"
+
 
 - name: Zookeeper Provisioning
   hosts: zookeeper
@@ -36,6 +50,7 @@
   tasks:
   - import_role:
       name: confluent.kafka_broker
+
 
 - name: Schema Registry Provisioning
   hosts: schema_registry

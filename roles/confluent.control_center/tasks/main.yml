@@ -11,11 +11,11 @@
   loop: "{{control_center_packages}}"
   when: ansible_os_family == "RedHat"
 
-- name: Install the Control Center Packages
-  apt:
-    name: "{{item}}{{confluent_package_debian_suffix}}"
-  loop: "{{control_center_packages}}"
-  when: ansible_os_family == "Debian"
+#- name: Install the Control Center Packages
+#  apt:
+#    name: "{{item}}{{confluent_package_debian_suffix}}"
+#  loop: "{{control_center_packages}}"
+#  when: ansible_os_family == "Debian"
 
 # Configure environment
 - name: Create Control Center Group
@@ -54,6 +54,8 @@
     keystore_keypass: "{{control_center_keystore_keypass}}"
     service_name: control_center
     hostnames: "{{ [inventory_hostname] }}"
+    debug:
+      msg: "{{control_center_keystore_keypass}}"
   when: control_center_ssl_enabled|bool or kafka_broker_listeners[control_center_kafka_listener_name]['ssl_enabled'] | default(ssl_enabled) | bool
 
 - name: Configure Kerberos
@@ -76,11 +78,17 @@
   notify:
     - restart control center
 
-- name: Set Permissions on /var/log/confluent
+- name: Create directory /control_center/tmp
   file:
-    path: /var/log/confluent/
+     path:  /var/log/confluent/control_center/tmp
+     state: directory
+
+- name: Set Permissions on /var/log/confluent/control_center/tmp
+  file:
+    path: /var/log/confluent/control_center/tmp
     owner: "{{control_center_user}}"
     group: "{{control_center_group}}"
+
 
 - name: Create Logs Directory
   file:

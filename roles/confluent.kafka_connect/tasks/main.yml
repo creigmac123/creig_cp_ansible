@@ -11,11 +11,11 @@
   loop: "{{kafka_connect_packages}}"
   when: ansible_os_family == "RedHat"
 
-- name: Install the Kafka Connect Packages
-  apt:
-    name: "{{item}}{{confluent_package_debian_suffix}}"
-  loop: "{{kafka_connect_packages}}"
-  when: ansible_os_family == "Debian"
+- #name: Install the Kafka Connect Packages
+  #apt:
+  #  name: "{{item}}{{confluent_package_debian_suffix}}"
+  #loop: "{{kafka_connect_packages}}"
+  #when: ansible_os_family == "Debian"
 
 # Configure environment
 - name: Create Connect Distributed Group
@@ -113,6 +113,7 @@
     name: "{{kafka_connect_service_name}}"
     enabled: yes
     state: started
+- debug: var=output.stdout_lines
 
 - name: Health Check
   include_tasks: health_check.yml
